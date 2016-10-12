@@ -1,6 +1,6 @@
 Name:           compat-libgcrypt
 Version:        1.5.5
-Release:        5%{?dist}
+Release:        6%{?dist}
 URL:            http://www.gnupg.org/
 License:        LGPLv2+
 Summary:        A general-purpose cryptography library
@@ -41,25 +41,10 @@ BuildRequires:  gawk
 BuildRequires:  libgpg-error-devel >= 1.4
 BuildRequires:  pkgconfig
 BuildRequires:  fipscheck
-# This is needed only when patching the .texi doc.
-BuildRequires:  texinfo
 
 %description
 Libgcrypt is a general purpose crypto library based on the code used in GNU
 Privacy Guard. This is a development version.
-
-%package devel
-Summary:        Development files for the %{name} package
-License:        LGPLv2+ and GPLv2+
-Requires(pre):  /sbin/install-info
-Requires(post): /sbin/install-info
-Requires:       libgpg-error-devel
-Requires:       %{name} = %{version}-%{release}
-
-%description devel
-Libgcrypt is a general purpose crypto library based on the code used in GNU
-Privacy Guard. This package contains files needed to develop applications using
-libgcrypt.
 
 %prep
 %setup -q -n libgcrypt-%{version}
@@ -103,52 +88,26 @@ make check
 %{nil}
 
 %install
-%make_install
-
-# Change /usr/lib64 back to /usr/lib.  This saves us from having to patch the
-# script to "know" that -L/usr/lib64 should be suppressed, and also removes
-# a file conflict between 32- and 64-bit versions of this package.
-# Also replace my_host with none.
-sed -i -e 's,^libdir="/usr/lib.*"$,libdir="/usr/lib",g' %{buildroot}/%{_bindir}/libgcrypt-config
-sed -i -e 's,^my_host=".*"$,my_host="none",g' %{buildroot}/%{_bindir}/libgcrypt-config
-
-rm -f %{buildroot}/%{_infodir}/dir %{buildroot}/%{_libdir}/*.la
-/sbin/ldconfig -n %{buildroot}/%{_libdir}
-
-# Create /etc/gcrypt (hardwired, not dependent on the configure invocation) so
-# that _someone_ owns it.
+install -D -m755 src/.libs/libgcrypt.so.11.8.4 %{buildroot}/%{_libdir}/libgcrypt.so.11.8.4
+ln -sf libgcrypt.so.11.8.4 %{buildroot}/%{_libdir}/libgcrypt.so.11
 mkdir -p -m 755 %{buildroot}/etc/gcrypt
 
 %post -p /sbin/ldconfig
 
 %postun -p /sbin/ldconfig
 
-%post devel
-/sbin/install-info %{_infodir}/gcrypt.info.gz %{_infodir}/dir || :
-
-%preun devel
-if [ $1 = 0 ] ; then
-  /sbin/install-info --delete %{_infodir}/gcrypt.info.gz %{_infodir}/dir || :
-fi
-
 %files
-%{!?_licensedir:%global license %%doc}
 %license COPYING.LIB
-%doc AUTHORS NEWS THANKS
 %dir /etc/gcrypt
 %{_libdir}/libgcrypt.so.*
 %{_libdir}/.libgcrypt.so.*.hmac
 
-%files devel
-%{_bindir}/dumpsexp
-%{_bindir}/hmac256
-%{_bindir}/libgcrypt-config
-%{_datadir}/aclocal/*
-%{_includedir}/*
-%{_infodir}/gcrypt.info*
-%{_libdir}/*.so
-
 %changelog
+* Wed Oct 12 2016 Simone Caronni <negativo17@gmail.com> - 1.5.5-6
+- Remove devel subpackage.
+- Make the package much smaller in terms of functionality, similar to other
+  compat packages.
+
 * Fri Apr 01 2016 Simone Caronni <negativo17@gmail.com> - 1.5.5-1
 - Update to 1.5.5.
 - Use new scriptlets for install-info.

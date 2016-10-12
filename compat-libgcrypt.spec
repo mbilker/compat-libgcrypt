@@ -89,7 +89,7 @@ make check
 
 %install
 install -D -m755 src/.libs/libgcrypt.so.11.8.4 %{buildroot}/%{_libdir}/libgcrypt.so.11.8.4
-ln -sf libgcrypt.so.11.8.4 %{buildroot}/%{_libdir}/libgcrypt.so.11
+ldconfig -nv %{buildroot}/%{_libdir}
 mkdir -p -m 755 %{buildroot}/etc/gcrypt
 
 %post -p /sbin/ldconfig

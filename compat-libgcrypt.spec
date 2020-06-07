@@ -37,6 +37,7 @@ Patch15:        libgcrypt-1.5.3-pbkdf-speedup.patch
 # varible GCRYPT_WHIRLPOOL_BUG
 Patch16:        libgcrypt-1.5.3-whirlpool-bug.patch
 
+BuildRequires:  gcc
 BuildRequires:  gawk
 BuildRequires:  libgpg-error-devel >= 1.4
 BuildRequires:  pkgconfig
